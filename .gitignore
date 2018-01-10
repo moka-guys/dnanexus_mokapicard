@@ -1,0 +1,3 @@
+resources/*.jar
+resources/usr/bin/samtools
+resources/*.so
