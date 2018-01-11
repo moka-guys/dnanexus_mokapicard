@@ -13,13 +13,6 @@ collect_multiple_metrics() {
 }
 
 calculate_hs_metrics() {
-	# Give genome reconstruction script permissions to run
-	chmod +x /usr/bin/reconstruct-human-genome.sh 
-	genome=`reconstruct-human-genome.sh "$sorted_bam_path"`
-	if [ ! -e genome.fa.fai ]; then
-	  samtools faidx genome.fa
-	fi
-
 	# Set prefix for file containing geneome target regions using names of input files
 	targets=${vendor_exome_bedfile_prefix}_${fasta_index_prefix}_targets
 	# Prepare genome regions from input bam file
@@ -36,7 +29,6 @@ calculate_hs_metrics() {
 }
 
 main() {
-
 ##### SETUP #####
 
 # Download input files from inputSpec to ~/in/. Allows the use of DNA Nexus bash helper variables.
@@ -59,19 +51,11 @@ mkdir -p $output_dir
 # Call Picard CollectMultipleMetrics
 collect_multiple_metrics
 
-### GET REFERENCE GENOME 1 ###
-mkdir -p ${output_dir}/RefG1_CMM/
-mv genome.* ${output_dir}/RefG1_CMM/
-
 # Call Picard CalculateHSMetrics
 calculate_hs_metrics
 
-### GET REFERENCE GENOME 1 ###
-mkdir -p ${output_dir}/RefG2_CHM/
-mv genome.* ${output_dir}/RefG2_CHM/
-
 ##### CLEAN UP #####
 
-# Upload results
+# Upload all results files and directories in $HOME/out/moka_picard_stats/
 dx-upload-all-outputs --parallel
 }
