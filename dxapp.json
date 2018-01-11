@@ -1,6 +1,6 @@
 {
-  "name": "moka_Picard",
-  "title": "MokaPipe Picard",
+  "name": "moka_picard",
+  "title": "Moka Picard",
   "summary": "v1.0 - Run Picard Tools suite for sequence QC; MarkDuplicates(WES Only), CollectMultipleMetrics and CalculateHsMetrics",
   "properties": {
     "github release": "v1.0"
@@ -35,13 +35,6 @@
       "label": "Picard stats files",
       "help": "The generated statistics files",
       "class": "array:file"
-    },
-    {
-      "name": "picard_markduplicates_bam",
-      "label": "Picard MarkDuplicates output BAM file",
-      "help": "A deduplicated BAM file created from the input BAM using Picard MarkDuplicates",
-      "class": "file",
-      "patterns": ["*.bam"]
     }
   ],
   "runSpec": {

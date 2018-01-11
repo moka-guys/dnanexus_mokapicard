@@ -9,12 +9,16 @@ collect_multiple_metrics() {
 	$java -jar /picard.jar CollectMultipleMetrics I="$sorted_bam_path" R=genome.fa \
 	    PROGRAM=CollectAlignmentSummaryMetrics PROGRAM=CollectInsertSizeMetrics \
 	    PROGRAM=QualityScoreDistribution PROGRAM=MeanQualityByCycle \
-	    PROGRAM=CollectBaseDistributionByCycle O="out/moka_picard_stats/QC/$sorted_bam_prefix"
+	    PROGRAM=CollectBaseDistributionByCycle O="$output_dir/$sorted_bam_prefix"
 }
 
 calculate_hs_metrics() {
 	# Give genome reconstruction script permissions to run
 	chmod +x /usr/bin/reconstruct-human-genome.sh 
+	genome=`reconstruct-human-genome.sh "$sorted_bam_path"`
+	if [ ! -e genome.fa.fai ]; then
+	  samtools faidx genome.fa
+	fi
 
 	# Set prefix for file containing geneome target regions using names of input files
 	targets=${vendor_exome_bedfile_prefix}_${fasta_index_prefix}_targets
@@ -26,8 +30,9 @@ calculate_hs_metrics() {
 	awk '{print $1 "\t" $2+1 "\t" $3 "\t+\t" $1 ":" $2+1 "-" $3}' < tidied.bed >> $targets.picard
 
 	# Run Picard CalculateHsMetrics
-	$java -jar /picard.jar CalculateHsMetrics BI=$targets.picard TI=$targets.picard \
-	   I="$sorted_bam_path" O=hsmetrics.tsv R=genome.fa PER_TARGET_COVERAGE=pertarget_coverage.tsv
+	$java -jar /picard.jar CalculateHsMetrics BI=$targets.picard TI=$targets.picard I="$sorted_bam_path" \
+	    O="$output_dir/${sorted_bam_prefix}.hsmetrics.tsv" R=genome.fa \
+	    PER_TARGET_COVERAGE="$output_dir/${sorted_bam_prefix}.pertarget_coverage.tsv"
 }
 
 main() {
@@ -35,7 +40,7 @@ main() {
 ##### SETUP #####
 
 # Download input files from inputSpec to ~/in/. Allows the use of DNA Nexus bash helper variables.
-dx download-all-inputs
+dx-download-all-inputs
 
 # Calculate 90% of memory size for java
 mem_in_mb=`head -n1 /proc/meminfo | awk '{print int($2*0.9/1024)}'`
@@ -46,20 +51,26 @@ java="java -Xmx${mem_in_mb}m"
 tar zxvf $fasta_index_path
 
 # Create directory for Picard stats files to be uploaded from the worker
-output_dir="~/out/moka_picard_stats/QC/"
+output_dir=$HOME/out/moka_picard_stats/QC
 mkdir -p $output_dir
 
 ##### MAIN #####
 
-# Call Picard Tools modules
+# Call Picard CollectMultipleMetrics
 collect_multiple_metrics
+
+### GET REFERENCE GENOME 1 ###
+mkdir -p ${output_dir}/RefG1_CMM/
+mv genome.* ${output_dir}/RefG1_CMM/
+
+# Call Picard CalculateHSMetrics
 calculate_hs_metrics
 
-##### CLEAN UP #####
+### GET REFERENCE GENOME 1 ###
+mkdir -p ${output_dir}/RefG2_CHM/
+mv genome.* ${output_dir}/RefG2_CHM/
 
-# Move results files to output directory
-	mv hsmetrics.tsv $output_dir/"${sorted_bam_prefix}.hsmetrics.tsv"
-	mv pertarget_coverage.tsv $output_dir/"$sorted_bam_prefix.pertarget_coverage.tsv"
+##### CLEAN UP #####
 
 # Upload results
 dx-upload-all-outputs --parallel
