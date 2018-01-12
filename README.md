@@ -46,4 +46,4 @@ Detailed information about the metrics reported by all Picard suites can be foun
 https://broadinstitute.github.io/picard/picard-metric-definitions.html
 
 ## How does this app work?
-This app downloads the given input files, then calls Picard CollectMultipleMetrics and Picard CalculateHsMetrics using the sorted BAM file as input. Finally, all output files produced by both Picard modules are uploaded to a 'QC/' directory.
+This app downloads the given input files, then calls Picard CollectMultipleMetrics and Picard CalculateHsMetrics using the sorted BAM file as input. Finally, all output files produced by this app are uploaded to a 'QC/' directory.
