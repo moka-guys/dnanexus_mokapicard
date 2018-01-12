@@ -16,24 +16,21 @@ collect_multiple_metrics() {
 }
 
 calculate_hs_metrics() {
-	# Set prefix for file containing genome target regions using names of input files.
-	targets=${vendor_exome_bedfile_prefix}_${fasta_index_prefix}_targets
-
 	# Prepare the genome regions from input bam file header. This appends every header line beginning
-	# with '@SQ' to the $targets.picard file. These lines contain the regions of the reference
+	# with '@SQ' to the targets.picard file. These lines contain the regions of the reference
 	# genome to which the sample was aligned.
-	samtools view -H "$sorted_bam_path" | grep '^@SQ' > $targets.picard
+	samtools view -H "$sorted_bam_path" | grep '^@SQ' > targets.picard
 
-	# Recreate the vendor bedfile format from mokabed files. The final output ($targets.picard)
+	# Recreate the vendor bedfile format from mokabed files. The final output (targets.picard)
 	# contains the BED file of genome targets required as input for the Bait Intervals (BI=) and
 	# Target Intervals (TI=) arguments in the Picard CalculateHsMetrics command below.
 	cat $vendor_exome_bedfile_path | grep -v '^#' | sed 's/chr//' | awk -F '\t' '{print $1,$2,$3}' >  tidied.bed
-	awk '{print $1 "\t" $2+1 "\t" $3 "\t+\t" $1 ":" $2+1 "-" $3}' < tidied.bed >> $targets.picard
+	awk '{print $1 "\t" $2+1 "\t" $3 "\t+\t" $1 ":" $2+1 "-" $3}' < tidied.bed >> targets.picard
 
 	# Call Picard CalculateHsMetrics. Requires the co-ordinate sorted BAM file given to the app as
 	# input (I=). Outputs the hsmetrics.tsv and pertarget_coverage.tsv files to $output_dir
 	# (defined in main()) for upload to DNA Nexus.
-	$java -jar /picard.jar CalculateHsMetrics BI=$targets.picard TI=$targets.picard I="$sorted_bam_path" \
+	$java -jar /picard.jar CalculateHsMetrics BI=targets.picard TI=targets.picard I="$sorted_bam_path" \
 	    O="$output_dir/${sorted_bam_prefix}.hsmetrics.tsv" R=genome.fa \
 	    PER_TARGET_COVERAGE="$output_dir/${sorted_bam_prefix}.pertarget_coverage.tsv"
 }
