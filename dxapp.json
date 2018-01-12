@@ -1,0 +1,67 @@
+{
+  "name": "moka_picard",
+  "title": "Moka Picard",
+  "summary": "v1.0 - Run Picard Tools suite for sequence QC; MarkDuplicates(WES Only), CollectMultipleMetrics and CalculateHsMetrics",
+  "properties": {
+    "github release": "v1.0"
+  },
+  "dxapi": "1.0.0",
+  "inputSpec": [
+    {
+      "name": "sorted_bam",
+      "label": "Sorted Mappings",
+      "help": "An input BAM file for deduplicating and/or Picard Tools QC suites",
+      "class": "file",
+      "patterns": ["*.bam"]
+    },
+    {
+      "name": "fasta_index",
+      "label": "Reference FASTA index archive",
+      "help": "A gzipped tarball containing the reference genome files genome.fa, genome.fa.fai and genome.dict.",
+      "class": "file",
+      "patterns": ["*.fasta-index.tar.gz"]
+    },
+    {
+      "name": "vendor_exome_bedfile",
+      "label": "Bedfile used to calculate HS metrics",
+      "help": "Choose the vendor exome (enrichment kit) whose coordinates will be used to calculate the selection metrics. See the app help for more information.",
+      "class": "file",
+      "patterns": ["*.bed"]
+    }
+  ],
+  "outputSpec": [
+    {
+      "name": "moka_picard_stats",
+      "label": "Picard stats files",
+      "help": "The generated statistics files",
+      "class": "array:file"
+    }
+  ],
+  "runSpec": {
+    "execDepends": [
+      {
+        "name": "openjdk-7-jre-headless"
+      }
+    ],
+    "systemRequirementsByRegion": {
+      "aws:us-east-1": {
+        "main": {
+          "instanceType": "mem1_ssd1_x4"
+        }
+      }
+    },
+    "systemRequirements": {
+      "main": {
+        "instanceType": "mem1_ssd1_x4"
+      }
+    },
+    "file": "src/code.sh",
+    "interpreter": "bash",
+    "distribution": "Ubuntu",
+    "release":"14.04"
+  },
+  "details": {
+    "upstreamUrls": ["http://broadinstitute.github.io/picard/", "http://picard.sourceforge.net/"],
+    "upstreamLicenses": ["Apache License V2.0", "MIT License"]
+  }
+}
