@@ -1,11 +1,12 @@
 # Moka Picard v1.1
-
 ## What does this app do?
 This app runs modules from the Picard Tools suite to generate quality-control (QC) statistics from mapped/aligned reads. Specifically, this app (for capture panels):
 * Calculates multiple summary statistic metrics for mapped reads (paired or unpaired) using Picard [CollectMultipleMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#CollectMultipleMetrics).
 * Calculates mappings metrics to determine the performance of the capture kit by assessing the coverage across all targets in the kit, using Picard [CalculateHsMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#CollectHsMetrics).
+
 and for amplicon panels:
 * Calculates mappings metrics to determine the performance of the amplicon kit by assessing the coverage across all targets in the kit, using Picard [TargetedPcrMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#TargetedPcrMetrics).
+
 For more information on the Picard Tools suite see: http://broadinstitute.github.io/picard/
 
 ## What are typical use cases for this app?
@@ -59,6 +60,7 @@ Detailed information about the metrics reported by all Picard suites can be foun
 https://broadinstitute.github.io/picard/picard-metric-definitions.html
 
 ## How does this app work?
-This app downloads the given input files, then uses the BAM and BED file to create a picard intervals_list file. 
-Then depending on the capture/amplicon flag calls either Picard CollectMultipleMetrics and Picard CalculateHsMetrics or Picard TargetedPcrMetrics using the sorted BAM file as input. 
-Finally, all output files produced by this app are uploaded to a 'QC/' directory.
+This app downloads the given input files and uses BAM and BED files to create a picard intervals_list file. 
+Depending on the capture/amplicon flag either Picard TargetedPcrMetrics or both Picard CollectMultipleMetrics and Picard CalculateHsMetrics are then called. 
+
+All output files are uploaded into the directory '/QC'.
