@@ -1,9 +1,9 @@
 {
-  "name": "moka_picard",
-  "title": "Moka Picard",
-  "summary": "v1.0 - Run Picard Tools suite for sequence QC; MarkDuplicates(WES Only), CollectMultipleMetrics and CalculateHsMetrics",
+  "name": "moka_picard_v1.1",
+  "title": "Moka Picard v1.1",
+  "summary": "v1.1 - Run Picard Tools suite for sequence QC; MarkDuplicates(WES Only), CollectMultipleMetrics and CalculateHsMetrics",
   "properties": {
-    "github release": "v1.0"
+    "github release": "v1.1"
   },
   "dxapi": "1.0.0",
   "inputSpec": [
@@ -27,6 +27,14 @@
       "help": "Choose the vendor exome (enrichment kit) whose coordinates will be used to calculate the selection metrics. See the app help for more information.",
       "class": "file",
       "patterns": ["*.bed"]
+    },
+    {
+      "name": "Capture_panel",
+      "label": "Hybridisation Capture or Amplicon",
+      "help": "Capture panels require multiple metrics/HS metrics. Amplicon capture require targetedPCRmetrics.",
+      "class": "string", 
+      "choices": ["Amplicon","Hybridisation"],
+      "group": "Capture type"
     }
   ],
   "outputSpec": [
