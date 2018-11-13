@@ -4,6 +4,30 @@
 # and to output each line as it is executed -- useful for debugging
 set -e -x -o pipefail
 
+create_interval_file(){
+	# Prepare the genome regions from input bam file header. This appends every header line beginning
+	# with '@SQ' to the targets.picard file. These lines contain the regions of the reference
+	# genome to which the sample was aligned.
+	samtools view -H "$sorted_bam_path" | grep '^@SQ' > targets.picard
+
+	# Recreate the vendor bedfile format from mokabed files. The final output (targets.picard)
+	# contains the BED file of genome targets required as input for the Bait Intervals (BI=) and
+	# Target Intervals (TI=) arguments in the Picard CalculateHsMetrics command below.
+	cat $vendor_exome_bedfile_path | grep -v '^#' | sed 's/chr//' | awk -F '\t' '{print $1,$2,$3}' >  tidied.bed
+	awk '{print $1 "\t" $2+1 "\t" $3 "\t+\t" $1 ":" $2+1 "-" $3}' < tidied.bed >> targets.picard
+}
+
+collect_targeted_pcr_metrics() {
+	# Call Picard CollectMultipleMetrics. Requires the co-ordinate sorted BAM file given to the app
+	# as input. The file is referenced in this command with the option 'I=<input_file>'. Here, the
+	# downloaded BAM file path is accessed using the DNA Nexus helper variable $sorted_bam_path.
+	# All outputs are saved to $output_dir (defined in main()) for upload to DNA Nexus.
+	$java -jar /picard.jar CollectTargetedPcrMetrics  I="$sorted_bam_path" R=genome.fa \
+    O="$output_dir/$sorted_bam_prefix.targetPCRmetrics.txt" AI=targets.picard TI=targets.picard \
+    PER_TARGET_COVERAGE="$output_dir/$sorted_bam_prefix.perTargetCov.txt"
+
+}
+
 collect_multiple_metrics() {
 	# Call Picard CollectMultipleMetrics. Requires the co-ordinate sorted BAM file given to the app
 	# as input. The file is referenced in this command with the option 'I=<input_file>'. Here, the
@@ -16,17 +40,6 @@ collect_multiple_metrics() {
 }
 
 calculate_hs_metrics() {
-	# Prepare the genome regions from input bam file header. This appends every header line beginning
-	# with '@SQ' to the targets.picard file. These lines contain the regions of the reference
-	# genome to which the sample was aligned.
-	samtools view -H "$sorted_bam_path" | grep '^@SQ' > targets.picard
-
-	# Recreate the vendor bedfile format from mokabed files. The final output (targets.picard)
-	# contains the BED file of genome targets required as input for the Bait Intervals (BI=) and
-	# Target Intervals (TI=) arguments in the Picard CalculateHsMetrics command below.
-	cat $vendor_exome_bedfile_path | grep -v '^#' | sed 's/chr//' | awk -F '\t' '{print $1,$2,$3}' >  tidied.bed
-	awk '{print $1 "\t" $2+1 "\t" $3 "\t+\t" $1 ":" $2+1 "-" $3}' < tidied.bed >> targets.picard
-
 	# Call Picard CalculateHsMetrics. Requires the co-ordinate sorted BAM file given to the app as
 	# input (I=). Outputs the hsmetrics.tsv and pertarget_coverage.tsv files to $output_dir
 	# (defined in main()) for upload to DNA Nexus.
@@ -55,11 +68,22 @@ mkdir -p $output_dir
 
 ##### MAIN #####
 
+# Create the interval file
+create_interval_file
+
+# if it's a capture panel call the relevant modules
+if [[ "$Capture_panel" == "Hybridisation" ]]; then
 # Call Picard CollectMultipleMetrics
 collect_multiple_metrics
-
 # Call Picard CalculateHSMetrics
 calculate_hs_metrics
+
+# if it's a amplicon panel call the relevant modules
+elif [[ "$Capture_panel" == "Amplicon" ]]; then
+collect_targeted_pcr_metrics
+else
+echo "unknown capture type"
+fi
 
 ##### CLEAN UP #####
 
