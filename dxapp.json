@@ -1,9 +1,9 @@
 {
-  "name": "moka_picard_v1.1",
-  "title": "Moka Picard v1.1",
-  "summary": "v1.1 - Run Picard Tools suite for sequence QC; MarkDuplicates(WES Only), CollectMultipleMetrics and CalculateHsMetrics",
+  "name": "moka_picard_v1.2",
+  "title": "Moka Picard v1.2",
+  "summary": "v1.2 - Run Picard Tools suite for sequence QC; MarkDuplicates(WES Only), CollectMultipleMetrics and CalculateHsMetrics",
   "properties": {
-    "github release": "v1.1"
+    "github release": "v1.2"
   },
   "dxapi": "1.0.0",
   "inputSpec": [
@@ -29,11 +29,23 @@
       "patterns": ["*.bed"]
     },
     {
+      "name": "remove_chr",
+      "label": "remove chr from picard intervals",
+      "help": "removes 'chr' from bedfile file when creating interval files (used by hsmetrics and collect_targeted_pcr_metrics).",
+      "class": "boolean",
+      "optional": false,
+      "default": true,
+      "group": "Interval file"
+    },
+    {
       "name": "Capture_panel",
       "label": "Hybridisation Capture or Amplicon",
       "help": "Capture panels require multiple metrics/HS metrics. Amplicon capture require targetedPCRmetrics.",
-      "class": "string", 
-      "choices": ["Amplicon","Hybridisation"],
+      "class": "string",
+      "choices": [
+        "Amplicon",
+        "Hybridisation"
+      ],
       "group": "Capture type"
     }
   ],
@@ -51,25 +63,29 @@
         "name": "openjdk-7-jre-headless"
       }
     ],
-    "systemRequirementsByRegion": {
-      "aws:us-east-1": {
+    "file": "src/code.sh",
+    "release": "14.04",
+    "interpreter": "bash",
+    "distribution": "Ubuntu"
+  },
+  "details": {
+    "upstreamUrls": [
+      "http://broadinstitute.github.io/picard/",
+      "http://picard.sourceforge.net/"
+    ],
+    "upstreamLicenses": [
+      "Apache License V2.0",
+      "MIT License"
+    ]
+  },
+  "ignoreReuse": false,
+  "regionalOptions": {
+    "aws:us-east-1": {
+      "systemRequirements": {
         "main": {
           "instanceType": "mem1_ssd1_x4"
         }
       }
-    },
-    "systemRequirements": {
-      "main": {
-        "instanceType": "mem1_ssd1_x4"
-      }
-    },
-    "file": "src/code.sh",
-    "interpreter": "bash",
-    "distribution": "Ubuntu",
-    "release":"14.04"
-  },
-  "details": {
-    "upstreamUrls": ["http://broadinstitute.github.io/picard/", "http://picard.sourceforge.net/"],
-    "upstreamLicenses": ["Apache License V2.0", "MIT License"]
+    }
   }
 }
