@@ -1,4 +1,4 @@
-# Moka Picard v1.1
+# Moka Picard v1.2
 ## What does this app do?
 This app runs modules from the Picard Tools suite to generate quality-control (QC) statistics from mapped/aligned reads. Specifically, this app (for capture panels):
 * Calculates multiple summary statistic metrics for mapped reads (paired or unpaired) using Picard [CollectMultipleMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#CollectMultipleMetrics).
@@ -36,6 +36,11 @@ A boolean flag which denotes the run is a amplicon or capture based panel.
 Capture panels = True will run [CollectMultipleMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#CollectMultipleMetrics) and [CalculateHsMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#CollectHsMetrics). 
 
 Capture panels = False will run [TargetedPcrMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#TargetedPcrMetrics).
+
+**remove_chr**
+A boolean flag to denote if chr should be removed from the chromosome column in the intervals file. The intervals file is used by HsMetrics and collect_targeted_pcr_metrics.
+
+An example when this is set to false is the TSO500 kit, which uses the hg19 reference genome.
 
 ## What does this app output?
 All Picard statistics files produced by this app are uploaded to a 'QC/' directory in the DNA Nexus project or working directory from which the app was called.

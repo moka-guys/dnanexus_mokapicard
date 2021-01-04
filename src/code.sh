@@ -13,7 +13,12 @@ create_interval_file(){
 	# Recreate the vendor bedfile format from mokabed files. The final output (targets.picard)
 	# contains the BED file of genome targets required as input for the Bait Intervals (BI=) and
 	# Target Intervals (TI=) arguments in the Picard CalculateHsMetrics command below.
-	cat $vendor_exome_bedfile_path | grep -v '^#' | sed 's/chr//' | awk -F '\t' '{print $1,$2,$3}' >  tidied.bed
+	# if remove chr is false skip the sed step
+	if [ "$remove_chr" == "true" ]; then
+		cat $vendor_exome_bedfile_path | grep -v '^#' | sed 's/chr//' | awk -F '\t' '{print $1,$2,$3}' >  tidied.bed
+	else
+		cat $vendor_exome_bedfile_path | grep -v '^#' | awk -F '\t' '{print $1,$2,$3}' >  tidied.bed
+	fi
 	awk '{print $1 "\t" $2+1 "\t" $3 "\t+\t" $1 ":" $2+1 "-" $3}' < tidied.bed >> targets.picard
 }
 
