@@ -1,13 +1,17 @@
 # Moka Picard v1.2
+ **The version of GATK used should be consistent with that used in the automated scripts**
+
 ## What does this app do?
-This app runs modules from the Picard Tools suite to generate quality-control (QC) statistics from mapped/aligned reads. Specifically, this app (for capture panels):
+The app runs dockerised GATK v4.1.8.1 (Picard Tools v2.22.8) and samtools v1.13. The app runs modules from the Picard Tools suite to generate quality-control (QC) statistics from mapped/aligned reads. Specifically, this app (for capture panels):
 * Calculates multiple summary statistic metrics for mapped reads (paired or unpaired) using Picard [CollectMultipleMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#CollectMultipleMetrics).
 * Calculates mappings metrics to determine the performance of the capture kit by assessing the coverage across all targets in the kit, using Picard [CalculateHsMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#CollectHsMetrics).
 
-and for amplicon panels:
+And for amplicon panels:
 * Calculates mappings metrics to determine the performance of the amplicon kit by assessing the coverage across all targets in the kit, using Picard [TargetedPcrMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#TargetedPcrMetrics).
 
-For more information on the Picard Tools suite see: http://broadinstitute.github.io/picard/
+For more information on GATK and the Picard Tools suite see: 
+* https://gatk.broadinstitute.org/hc/en-us
+* http://broadinstitute.github.io/picard/
 
 ## What are typical use cases for this app?
 This app is designed to be run on aligned sequencing data, either as a standalone app or as part of a DNA Nexus workflow. For an example workflow, search for 'MokaWES' in DNA Nexus. 
