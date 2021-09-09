@@ -1,7 +1,7 @@
 {
   "name": "moka_picard_v1.2",
   "title": "Moka Picard v1.2",
-  "summary": "v1.2 - Run Picard Tools suite for sequence QC; MarkDuplicates(WES Only), CollectMultipleMetrics and CalculateHsMetrics",
+  "summary": "v1.2 - Run Picard Tools suite for sequence QC; MarkDuplicates(WES Only), CollectMultipleMetrics and CalculateHsMetrics. Runs dockerised GATK v4.1.8.1 (Picard Tools v2.22.8) and samtools v1.13.",
   "properties": {
     "github release": "v1.2"
   },
@@ -58,15 +58,17 @@
     }
   ],
   "runSpec": {
-    "execDepends": [
-      {
-        "name": "openjdk-7-jre-headless"
-      }
-    ],
+    "execDepends": [],
     "file": "src/code.sh",
-    "release": "14.04",
+    "release": "20.04",
+    "version": "0",
     "interpreter": "bash",
     "distribution": "Ubuntu"
+  },
+  "access": {
+    "network": [
+      "*"
+    ]
   },
   "details": {
     "upstreamUrls": [
