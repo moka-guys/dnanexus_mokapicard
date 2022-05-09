@@ -70,16 +70,3 @@ https://broadinstitute.github.io/picard/picard-metric-definitions.html
 This app downloads the given input files and uses BAM and BED files to create a picard intervals_list file. Depending on the capture/amplicon flag either Picard TargetedPcrMetrics or both Picard CollectMultipleMetrics and Picard CalculateHsMetrics are then called. 
 
 All output files are uploaded into the directory '/QC'.
-
-## Which docker images are used?
-Docker files are downloaded from 001_ToolsReferenceData.
-
-These images were created as below:
-```
-sudo docker image pull quay.io/biocontainers/samtools@sha256:04da5297386dfae2458a93613a8c60216d158ee7cb9f96188dad71c1952f7f72 
-sudo docker image pull broadinstitute/picard@sha256:865f15c917aa14d85e44ee7408922f14b7f714bffbe93e7c19c6afc456922fe4 
-sudo docker tag 70514a9232dc quay.io/biocontainers/samtools:1.13--h8c37831_0
-sudo docker tag 7560a48472d4 broadinstitute/picard:2.22.8
-sudo docker save quay.io/biocontainers/samtools:1.13--h8c37831_0 | gzip > quay.io_biocontainers_samtools:1.13--h8c37831_0_.tar.gz
-sudo docker save broadinstitute/picard:2.22.8 | gzip > broadinstitute_picard:2.22.8.tar.gz
-```
