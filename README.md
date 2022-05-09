@@ -2,8 +2,7 @@
  **The version of PicardTools used should be consistent with that used in GATK in the automated scripts**
 
 ## What does this app do?
-The app runs dockerised versions of Picard (v2.22.8) and samtools (v1.13). Docker images have been saved as .tar.gz files 
-which are loaded from 001_ToolsReferenceData.
+The app runs dockerised versions of Picard (v2.22.8) and samtools (v1.13). Docker images have been saved as .tar.gz files which are loaded from 001_ToolsReferenceData.
 
 The app runs modules from the Picard Tools suite to generate quality-control (QC) statistics from mapped/aligned reads. Specifically, this app (for capture panels):
 * Calculates multiple summary statistic metrics for mapped reads (paired or unpaired) using Picard [CollectMultipleMetrics](https://broadinstitute.github.io/picard/command-line-overview.html#CollectMultipleMetrics).
