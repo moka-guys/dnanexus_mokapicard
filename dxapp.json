@@ -58,7 +58,8 @@
     }
   ],
   "runSpec": {
-    "execDepends": [],
+    "execDepends": [
+  ],
     "file": "src/code.sh",
     "release": "20.04",
     "version": "0",
@@ -68,7 +69,9 @@
   "access": {
     "network": [
       "*"
-    ]
+    ],
+    "project": "CONTRIBUTE",
+    "allProjects": "VIEW"
   },
   "details": {
     "upstreamUrls": [

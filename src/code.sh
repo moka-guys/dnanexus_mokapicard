@@ -57,10 +57,14 @@ main() {
 
   # Download input files from inputSpec to ~/in/. Allows the use of DNA Nexus bash helper variables.
   dx-download-all-inputs
-
+  
+  # download specified docker images from 001
+  dx download project-ByfFPz00jy1fk6PjpZ95F27J:file-G9kzPK80jy1XXfJf844Y01vg # download broadinstitute_picard:2.22.8.tar.gz
+  dx download project-ByfFPz00jy1fk6PjpZ95F27J:file-G9kzPK80jy1jJv1j7gp045JG # download quay.io_biocontainers_samtools:1.13--h8c37831_0_.tar.gz
+  
   # Load picard and samtools images
-  docker load < /usr/bin/picard.tar.gz
-  docker load < /usr/bin/samtools.tar.gz
+  docker load < broadinstitute_picard:2.22.8.tar.gz
+  docker load < quay.io_biocontainers_samtools:1.13--h8c37831_0_.tar.gz
 
   # Unpack the reference genome for Picard. Produces genome.fa, genome.fa.fai, and genome.dict files.
   tar zxvf "$fasta_index_path"
