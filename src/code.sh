@@ -5,93 +5,95 @@
 set -e -x -o pipefail
 
 create_interval_file(){
-	# Prepare the genome regions from input bam file header. This appends every header line beginning
-	# with '@SQ' to the targets.picard file. These lines contain the regions of the reference
-	# genome to which the sample was aligned.
-	samtools view -H "$sorted_bam_path" | grep '^@SQ' > targets.picard
+	# Prepare the genome regions from input bam file header. This appends every header line beginning with '@SQ' to the
+	# targets.picard file. These lines contain the regions of the reference genome to which the sample was aligned
+	docker run -v /home/dnanexus:/home/dnanexus quay.io/biocontainers/samtools:1.13--h8c37831_0 samtools view \
+	  -H "$sorted_bam_path" | grep '^@SQ' > targets.picard
 
-	# Recreate the vendor bedfile format from mokabed files. The final output (targets.picard)
-	# contains the BED file of genome targets required as input for the Bait Intervals (BI=) and
-	# Target Intervals (TI=) arguments in the Picard CalculateHsMetrics command below.
-	# if remove chr is false skip the sed step
+	# Recreate the vendor bedfile format from mokabed files. The final output (targets.picard) contains the BED file of
+	# genome targets required as input for the Bait Intervals (-BI) and Target Intervals (-TI) arguments in the Picard
+	# commands below. If remove chr is false skip the sed step
 	if [ "$remove_chr" == "true" ]; then
-		cat $vendor_exome_bedfile_path | grep -v '^#' | sed 's/chr//' | awk -F '\t' '{print $1,$2,$3}' >  tidied.bed
+		grep -v '^#' "$vendor_exome_bedfile_path"  | sed 's/chr//' | awk -F '\t' '{print $1,$2,$3}' >  tidied.bed
 	else
-		cat $vendor_exome_bedfile_path | grep -v '^#' | awk -F '\t' '{print $1,$2,$3}' >  tidied.bed
+		grep -v '^#' "$vendor_exome_bedfile_path" | awk -F '\t' '{print $1,$2,$3}' >  tidied.bed
 	fi
 	awk '{print $1 "\t" $2+1 "\t" $3 "\t+\t" $1 ":" $2+1 "-" $3}' < tidied.bed >> targets.picard
-}
+	}
 
 collect_targeted_pcr_metrics() {
-	# Call Picard CollectMultipleMetrics. Requires the co-ordinate sorted BAM file given to the app
-	# as input. The file is referenced in this command with the option 'I=<input_file>'. Here, the
-	# downloaded BAM file path is accessed using the DNA Nexus helper variable $sorted_bam_path.
-	# All outputs are saved to $output_dir (defined in main()) for upload to DNA Nexus.
-	$java -jar /picard.jar CollectTargetedPcrMetrics  I="$sorted_bam_path" R=genome.fa \
-    O="$output_dir/$sorted_bam_prefix.targetPCRmetrics.txt" AI=targets.picard TI=targets.picard \
-    PER_TARGET_COVERAGE="$output_dir/$sorted_bam_prefix.perTargetCov.txt"
-
-}
+	# Call Picard CollectMultipleMetrics. Requires the co-ordinate sorted BAM file given to the app as input. The file is
+	# referenced in this command with the option 'I=<input_file>'. Here, the downloaded BAM file path is accessed using
+	# the DNA Nexus helper variable $sorted_bam_path. All outputs are saved to $output_dir (defined in main()) for upload
+	# to DNA Nexus.
+	docker run -v /home/dnanexus:/home/dnanexus broadinstitute/picard:2.22.8 java -jar /usr/picard/picard.jar \
+	  CollectTargetedPcrMetrics I="$sorted_bam_path" R=/home/dnanexus/genome.fa \
+	  O="$output_dir/$sorted_bam_prefix.targetPCRmetrics.txt" AI=/home/dnanexus/targets.picard \
+	  TI=/home/dnanexus/targets.picard PER_TARGET_COVERAGE="$output_dir/$sorted_bam_prefix.perTargetCov.txt"
+	  }
 
 collect_multiple_metrics() {
-	# Call Picard CollectMultipleMetrics. Requires the co-ordinate sorted BAM file given to the app
-	# as input. The file is referenced in this command with the option 'I=<input_file>'. Here, the
-	# downloaded BAM file path is accessed using the DNA Nexus helper variable $sorted_bam_path.
-	# All outputs are saved to $output_dir (defined in main()) for upload to DNA Nexus.
-	$java -jar /picard.jar CollectMultipleMetrics I="$sorted_bam_path" R=genome.fa \
-	    PROGRAM=CollectAlignmentSummaryMetrics PROGRAM=CollectInsertSizeMetrics \
-	    PROGRAM=QualityScoreDistribution PROGRAM=MeanQualityByCycle \
-	    PROGRAM=CollectBaseDistributionByCycle O="$output_dir/$sorted_bam_prefix"
-}
+	# Call Picard CollectMultipleMetrics. Requires the co-ordinate sorted BAM file given to the app as input. The file is
+	# referenced in this command with the option 'I=<input_file>'. Here, the downloaded BAM file path is accessed using
+	# the DNA Nexus helper variable $sorted_bam_path. All outputs are saved to $output_dir (defined in main()) for upload
+	# to DNA Nexus.
+	docker run -v /home/dnanexus:/home/dnanexus broadinstitute/picard:2.22.8 java -jar /usr/picard/picard.jar \
+	  CollectMultipleMetrics I="$sorted_bam_path" R=/home/dnanexus/genome.fa PROGRAM=CollectAlignmentSummaryMetrics \
+	  PROGRAM=CollectInsertSizeMetrics PROGRAM=QualityScoreDistribution PROGRAM=MeanQualityByCycle \
+	  PROGRAM=CollectBaseDistributionByCycle O="$output_dir/$sorted_bam_prefix"
+	  }
 
-calculate_hs_metrics() {
-	# Call Picard CalculateHsMetrics. Requires the co-ordinate sorted BAM file given to the app as
-	# input (I=). Outputs the hsmetrics.tsv and pertarget_coverage.tsv files to $output_dir
-	# (defined in main()) for upload to DNA Nexus.
-	$java -jar /picard.jar CalculateHsMetrics BI=targets.picard TI=targets.picard I="$sorted_bam_path" \
-	    O="$output_dir/${sorted_bam_prefix}.hsmetrics.tsv" R=genome.fa \
-	    PER_TARGET_COVERAGE="$output_dir/${sorted_bam_prefix}.pertarget_coverage.tsv"
-}
+collect_hs_metrics() {
+	# Call Picard CollectHsMetrics. Requires the co-ordinate sorted BAM file given to the app as input (I). Outputs the
+	# hsmetrics.tsv and pertarget_coverage.tsv files to $output_dir (defined in main()) for upload to DNA Nexus.
+	docker run -v /home/dnanexus:/home/dnanexus broadinstitute/picard:2.22.8 java -jar /usr/picard/picard.jar \
+	 CollectHsMetrics BI=/home/dnanexus/targets.picard TI=/home/dnanexus/targets.picard I="$sorted_bam_path" \
+	  O="$output_dir/${sorted_bam_prefix}.hsmetrics.tsv" R=/home/dnanexus/genome.fa \
+	  PER_TARGET_COVERAGE="$output_dir/${sorted_bam_prefix}.pertarget_coverage.tsv"
+	  }
 
 main() {
-##### SETUP #####
+  ##### SETUP #####
 
-# Download input files from inputSpec to ~/in/. Allows the use of DNA Nexus bash helper variables.
-dx-download-all-inputs
+  # Download input files from inputSpec to ~/in/. Allows the use of DNA Nexus bash helper variables.
+  dx-download-all-inputs
+  
+  # download specified docker images from 001
+  dx download project-ByfFPz00jy1fk6PjpZ95F27J:file-G9kzPK80jy1XXfJf844Y01vg # download broadinstitute_picard:2.22.8.tar.gz
+  dx download project-ByfFPz00jy1fk6PjpZ95F27J:file-G9kzPK80jy1jJv1j7gp045JG # download quay.io_biocontainers_samtools:1.13--h8c37831_0_.tar.gz
+  
+  # Load picard and samtools images
+  docker load < broadinstitute_picard:2.22.8.tar.gz
+  docker load < quay.io_biocontainers_samtools:1.13--h8c37831_0_.tar.gz
 
-# Calculate 90% of memory size for java
-mem_in_mb=`head -n1 /proc/meminfo | awk '{print int($2*0.9/1024)}'`
-# Set java command with the calculated maximum memory usage
-java="java -Xmx${mem_in_mb}m"
+  # Unpack the reference genome for Picard. Produces genome.fa, genome.fa.fai, and genome.dict files.
+  tar zxvf "$fasta_index_path"
 
-# Unpack the reference genome for Picard. Produces genome.fa, genome.fa.fai, and genome.dict files.
-tar zxvf $fasta_index_path
+  # Create directory for Picard stats files to be uploaded from the worker
+  output_dir=$HOME/out/moka_picard_stats/QC
+  mkdir -p "$output_dir"
 
-# Create directory for Picard stats files to be uploaded from the worker
-output_dir=$HOME/out/moka_picard_stats/QC
-mkdir -p $output_dir
+  ##### MAIN #####
 
-##### MAIN #####
+  # Create the interval file
+  create_interval_file
 
-# Create the interval file
-create_interval_file
+  # if it's a capture panel call the relevant modules
+  if [[ "$Capture_panel" == "Hybridisation" ]]; then
+  # Call Picard CollectMultipleMetrics
+  collect_multiple_metrics
+  # Call Picard CollectHSMetrics
+  collect_hs_metrics
 
-# if it's a capture panel call the relevant modules
-if [[ "$Capture_panel" == "Hybridisation" ]]; then
-# Call Picard CollectMultipleMetrics
-collect_multiple_metrics
-# Call Picard CalculateHSMetrics
-calculate_hs_metrics
+  # if it's a amplicon panel call the relevant modules
+  elif [[ "$Capture_panel" == "Amplicon" ]]; then
+  collect_targeted_pcr_metrics
+  else
+  echo "unknown capture type"
+  fi
 
-# if it's a amplicon panel call the relevant modules
-elif [[ "$Capture_panel" == "Amplicon" ]]; then
-collect_targeted_pcr_metrics
-else
-echo "unknown capture type"
-fi
+  ##### CLEAN UP #####
 
-##### CLEAN UP #####
-
-# Upload all results files and directories in $HOME/out/moka_picard_stats/
-dx-upload-all-outputs --parallel
-}
+  # Upload all results files and directories in $HOME/out/moka_picard_stats/
+  dx-upload-all-outputs --parallel
+  }
