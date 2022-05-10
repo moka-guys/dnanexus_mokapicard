@@ -33,7 +33,7 @@ collect_targeted_pcr_metrics() {
 	  }
 
 collect_multiple_metrics() {
-	# Call Picard CollectMultipleMetrics. Requires the co-ordinate sorted BAM file given to the appas input. The file is
+	# Call Picard CollectMultipleMetrics. Requires the co-ordinate sorted BAM file given to the app as input. The file is
 	# referenced in this command with the option 'I=<input_file>'. Here, the downloaded BAM file path is accessed using
 	# the DNA Nexus helper variable $sorted_bam_path. All outputs are saved to $output_dir (defined in main()) for upload
 	# to DNA Nexus.
