@@ -1,4 +1,4 @@
-# Moka Picard v1.2
+# Moka Picard
  **The version of PicardTools used should be consistent with that used in GATK in the automated scripts**
 
 ## What does this app do?

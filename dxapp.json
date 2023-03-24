@@ -1,9 +1,9 @@
 {
-  "name": "moka_picard_v1.2",
-  "title": "Moka Picard v1.2",
-  "summary": "v1.2 - Run Picard Tools suite for sequence QC; MarkDuplicates(WES Only), CollectMultipleMetrics and CalculateHsMetrics. Runs dockerisedPicard Tools v2.22.8 and samtools v1.13.",
+  "name": "moka_picard_v1.2.1",
+  "title": "Moka Picard v1.2.1",
+  "summary": "v1.2.1 - Run Picard Tools suite for sequence QC; MarkDuplicates(WES Only), CollectMultipleMetrics and CalculateHsMetrics. Runs dockerisedPicard Tools v2.22.8 and samtools v1.13.",
   "properties": {
-    "github release": "v1.2"
+    "github release": "v1.2.1"
   },
   "dxapi": "1.0.0",
   "inputSpec": [
@@ -88,7 +88,7 @@
     "aws:us-east-1": {
       "systemRequirements": {
         "main": {
-          "instanceType": "mem1_ssd1_x4"
+          "instanceType": "mem1_ssd1_v2_x4"
         }
       }
     }
